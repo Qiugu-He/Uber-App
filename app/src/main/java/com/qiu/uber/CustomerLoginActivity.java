@@ -23,7 +23,7 @@ public class CustomerLoginActivity extends AppCompatActivity {
     private Button mLogin, mRegistration;
 
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener  firebaseAuthLister; //lister
+    private FirebaseAuth.AuthStateListener firebaseAuthLister; //lister
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +65,7 @@ public class CustomerLoginActivity extends AppCompatActivity {
                         }else{
                             String user_id = mAuth.getCurrentUser().getUid();
                             //point to rider
-                            DatabaseReference current_user_db = FirebaseDatabase.getInstance().getReference().child("Users").child("Customer").child(user_id);
+                            DatabaseReference current_user_db = FirebaseDatabase.getInstance().getReference().child("Users").child("Customers").child(user_id);
                             //make reference safe
                             current_user_db.setValue(true);
                         }
