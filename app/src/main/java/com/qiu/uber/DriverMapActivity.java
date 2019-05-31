@@ -53,16 +53,34 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        //set location enable
+        buildGoogleApiClient();
+        mMap.setMyLocationEnabled(true);
     }
 
+    protected synchronized void buildGoogleApiClient(){
+        //enable use google api and validate google api client
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();// allows use of api
+    }
 
     @Override
     public void onLocationChanged(Location location) {
+        //the function called every second
+        mLastLocation = location; // set a debuger at here
+                                  // once you lunch and keep continue, it will keep update every sec
 
+        //move the center of map at the same stage in which the user moves
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));// the zoom smaller, the closer to ground
     }
 
     @Override
@@ -78,7 +96,7 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             return;
-        } 
+        }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
