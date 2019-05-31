@@ -28,6 +28,7 @@ public class DriverLoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_login);
 
+        //set up firebase Auth
         mAuth = FirebaseAuth.getInstance(); //get the current state of login data
         firebaseAuthLister = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -35,18 +36,21 @@ public class DriverLoginActivity extends AppCompatActivity {
                 //check the user states
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if(user != null){
-                    Intent intent =  new Intent(DriverLoginActivity.this, MapActivity.class);
+                    Intent intent =  new Intent(DriverLoginActivity.this, DriverMapActivity.class);
                     startActivity(intent);
                     finish();
                     return;
                 }
             }
         };
-        mEmail = (EditText)findViewById(R.id.email);
-        mPassport = (EditText)findViewById(R.id.passport);
-        mLogin = (Button)findViewById(R.id.login);
-        mRegistration = (Button)findViewById(R.id.registration);
 
+        //get user input
+        mEmail = (EditText) findViewById(R.id.email);
+        mPassport = (EditText) findViewById(R.id.passport);
+        mLogin = (Button) findViewById(R.id.login);
+        mRegistration = (Button) findViewById(R.id.registration);
+
+        //registration button listener
         mRegistration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,6 +79,8 @@ public class DriverLoginActivity extends AppCompatActivity {
 
             }
         });
+
+        //login button listener
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
