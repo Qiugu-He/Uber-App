@@ -35,7 +35,7 @@ public class DriverLoginActivity extends AppCompatActivity {
                 //check the user states
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if(user != null){
-                    Intent intent =  new Intent(DriverLoginActivity.this, .class);
+                    Intent intent =  new Intent(DriverLoginActivity.this, MapActivity.class);
                     startActivity(intent);
                     finish();
                     return;
@@ -43,6 +43,8 @@ public class DriverLoginActivity extends AppCompatActivity {
             }
         };
 
+        mEmail = (EditText) findViewById(R.id.email);
+        mPassport = (EditText) findViewById(R.id.passport);
         mLogin = (Button) findViewById(R.id.login);
         mRegistration = (Button) findViewById(R.id.registration);
 
@@ -71,9 +73,25 @@ public class DriverLoginActivity extends AppCompatActivity {
 
             }
         });
+        mLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final String email = mEmail.getText().toString();
+                final String password = mPassport.getText().toString();
+                mAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(DriverLoginActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(!task.isSuccessful()){
+                            //tell user something wrong
+                            Toast.makeText(DriverLoginActivity.this, "Sign up error", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
 
-        mEmail = (EditText) findViewById(R.id.email);
-        mPassport = (EditText) findViewById(R.id.passport);
+
+
     }
 
     //when ever the activity id call, we must start the lisenler
@@ -88,4 +106,5 @@ public class DriverLoginActivity extends AppCompatActivity {
         mAuth.removeAuthStateListener(firebaseAuthLister);
     }
 
+    //test
 }
