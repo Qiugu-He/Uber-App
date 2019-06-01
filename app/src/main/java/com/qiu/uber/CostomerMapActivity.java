@@ -23,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -34,7 +35,9 @@ public class CostomerMapActivity  extends FragmentActivity implements OnMapReady
     Location mLastLocation;
     LocationRequest mLocationRequest;
 
-    private Button mLogout;
+    private Button mLogout, mRequest;
+
+    private LatLng pickupLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class CostomerMapActivity  extends FragmentActivity implements OnMapReady
 
         //-------------------user log out ----------------------------
         mLogout = (Button) findViewById(R.id.logout);
+        mRequest = (Button) findViewById(R.id.request);
         mLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,17 +64,28 @@ public class CostomerMapActivity  extends FragmentActivity implements OnMapReady
                 return;
             }
         });
+
+        //-------------user request ------------------------------------
+        mRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
+                GeoFire geoFire = new GeoFire(ref);
+                geoFire.setLocation(userId, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+
+                //create a marker for pick up location
+                pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pickup Here"));
+
+                //change the button text
+                mRequest.setText("Getting your driver...");
+            }
+        });
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -95,14 +110,15 @@ public class CostomerMapActivity  extends FragmentActivity implements OnMapReady
 
     @Override
     public void onLocationChanged(Location location) {
-        //the function called every second
-        mLastLocation = location; // set a debuger at here once you lunch and keep continue, it will keep update every sec
+        if(getApplicationContext() != null){
+            //the function called every second
+            mLastLocation = location; // set a debuger at here once you lunch and keep continue, it will keep update every sec
 
-        //move the center of map at the same stage in which the user moves
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));// the zoom smaller, the closer to ground
-
+            //move the center of map at the same stage in which the user moves
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(11));// the zoom smaller, the closer to ground
+        }
     }
 
     @Override
