@@ -14,6 +14,8 @@ import android.widget.Button;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -25,6 +27,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -80,11 +83,61 @@ public class CostomerMapActivity  extends FragmentActivity implements OnMapReady
 
                 //change the button text
                 mRequest.setText("Getting your driver...");
+
+
+                //get the drives information
+                getClosestDriver();
             }
         });
     }
 
+    private int radius = 1;
+    private Boolean driverFound = false;
+    private String driverFoundID;
+    private void getClosestDriver(){
+        final DatabaseReference driverLocation = FirebaseDatabase.getInstance().getReference().child("DriverAvailable");
 
+        GeoFire geoFire = new GeoFire(driverLocation);
+
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(pickupLocation.latitude, pickupLocation.longitude), radius);
+        geoQuery.removeAllListeners(); // for safely
+
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            //anytime a drive is find within radius , this function is called with the id of driver and its location form database
+            public void onKeyEntered(String key, GeoLocation location) {
+                //if we got multiple driver within the radius,
+                //we have to make sure the 1st driver found is the one pickup teh customer
+                if(!driverFound){
+                    driverFound = true; // now found a drive
+                    driverFoundID = key;
+                }
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                if(!driverFound){
+                    radius++; // radius increase by 1
+                    getClosestDriver(); // recurisivly until found a driver
+                }
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
