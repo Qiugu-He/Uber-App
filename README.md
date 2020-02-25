@@ -1,6 +1,6 @@
 # Taxi Pickup App
 
-This is an Android/Java version taxi app provide pickup services for customer based on their location.
+This is an Android/Java version taxi app that provides pickup services for customer based on their location.
 
 # How this app works:
 
